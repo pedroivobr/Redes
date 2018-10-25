@@ -3,13 +3,18 @@ import sys
 import traceback
 from threading import Thread
 
+global lista_addr
+global lista_conexao
+
+lista_conexao = []
+lista_addr = []
 
 def main():
     start_server()
 
 
 def start_server():
-    host = "127.0.0.1"
+    host = ""
     port = 8888         # arbitrary non-privileged port
 
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -31,6 +36,8 @@ def start_server():
         ip, port = str(address[0]), str(address[1])
         print("Connected with " + ip + ":" + port)
 
+        lista_conexao.append(connection)
+        ##lista_addr.append(address)
         try:
             Thread(target=client_thread, args=(connection, ip, port)).start()
         except:
@@ -50,10 +57,13 @@ def client_thread(connection, ip, port, max_buffer_size = 5120):
             print("Client is requesting to quit")
             connection.close()
             print("Connection " + ip + ":" + port + " closed")
+            lista_conexao.pop(connection)
             is_active = False
         else:
             print("Processed result: {}".format(client_input))
-            connection.sendall("-".encode("utf8"))
+            ##for conn in lista_conexao:
+            for conn in lista_conexao:
+                conn.send("oi oi oi =D".encode("utf8"))
 
 
 def receive_input(connection, max_buffer_size):
