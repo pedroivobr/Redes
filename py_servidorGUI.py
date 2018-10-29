@@ -26,6 +26,7 @@ def handle_client(client):  # Takes client socket as argument.
 
     while True:
         msg = client.recv(BUFSIZ)
+        print(msg)
         if msg == bytes("listar()","utf8"):
             client.send(bytes("lista de usuarios:\n","utf8"))
             for i,v in clients.items():
@@ -35,11 +36,13 @@ def handle_client(client):  # Takes client socket as argument.
             clients[client] = msg[5:-1].decode("utf8")
             broadcast(bytes("%s alterou o nome para %s." %(name,msg[5:-1].decode("utf8")), "utf8"))
             name = msg[5:-1].decode("utf8")
-        elif msg == "sair()":
-            client.send(bytes("sair()", "utf8"))
+        elif msg == bytes("sair()","utf8"):
             client.close()
             del clients[client]
             broadcast(bytes("%s saiu da sala." % name, "utf8"))
+            print(bytes("%s saiu da sala." % name, "utf8"))
+            #client.send(bytes("sair()", "utf8"))
+            #client.close()     
             break
         else:
             broadcast(msg, name+" escreveu: ")

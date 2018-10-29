@@ -3,6 +3,7 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 import tkinter
+import time
 
 
 def receive():
@@ -11,6 +12,9 @@ def receive():
         try:
             msg = client_socket.recv(BUFFERSIZE).decode("utf8")
             msg_list.insert(tkinter.END, msg)
+            #if msg == bytes("sair()","utf8"):
+            #    client_socket.close()
+            #    janela.destroy()
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -22,13 +26,13 @@ def send(event=None):  # event is passed by binders.
     client_socket.send(bytes(msg, "utf8"))
     if msg == "sair()":
         client_socket.close()
-        ##janela.quit()
+        janela.destroy()
 
 
 def on_closing(event=None):
     """This function is to be called when the window is closed."""
-    my_msg.set("sair()")
-    send()
+    ##my_msg.set("sair()")
+    client_socket.send(bytes("sair()", "utf8"))
 
 
 janela = tkinter.Tk()
