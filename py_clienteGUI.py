@@ -33,6 +33,8 @@ def on_closing(event=None):
     """This function is to be called when the window is closed."""
     ##my_msg.set("sair()")
     client_socket.send(bytes("sair()", "utf8"))
+    client_socket.close()
+    janela.destroy()
 
 
 janela = tkinter.Tk()
