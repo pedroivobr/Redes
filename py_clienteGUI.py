@@ -20,14 +20,14 @@ def send(event=None):  # event is passed by binders.
     msg = my_msg.get()
     my_msg.set("")  # Clears input field.
     client_socket.send(bytes(msg, "utf8"))
-    if msg == "{quit}":
+    if msg == "sair()":
         client_socket.close()
-        janela.quit()
+        ##janela.quit()
 
 
 def on_closing(event=None):
     """This function is to be called when the window is closed."""
-    my_msg.set("{quit}")
+    my_msg.set("sair()")
     send()
 
 

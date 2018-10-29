@@ -31,8 +31,10 @@ def handle_client(client):  # Takes client socket as argument.
             for i,v in clients.items():
                 client.send(bytes("Nome: "+ str(v) + ", IP: " +str(i.getpeername()[0]) + ", PORT:" + str(i.getpeername()[1]) +"\n","utf8")) 
             #client.send(bytes(msg,"utf8"))
-        elif msg[:5] == "nome(" and msg[-1] == ")":
-            clients[client] = msg[5:-1]
+        elif msg[:5] == bytes("nome(","utf8") and chr(msg[len(msg) - 1]) == ")":
+            clients[client] = msg[5:-1].decode("utf8")
+            broadcast(bytes("%s alterou o nome para %s." %(name,msg[5:-1].decode("utf8")), "utf8"))
+            name = msg[5:-1].decode("utf8")
         elif msg == "sair()":
             client.send(bytes("sair()", "utf8"))
             client.close()
