@@ -69,7 +69,7 @@ janela.protocol("WM_DELETE_WINDOW", on_closing) ##caso a janela fechar
 
 ##conexão
 HOST = input('Enter host: ')
-PORT = input('Enter port: ')
+PORT = "33000"#input('Enter port: ')
 if not PORT:
     PORT = 33000
 else:

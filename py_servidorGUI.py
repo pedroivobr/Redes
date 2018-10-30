@@ -3,6 +3,7 @@
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 
+destino = ''
 
 def accept_incoming_connections():
     """Sets up handling for incoming clients."""
@@ -16,6 +17,9 @@ def accept_incoming_connections():
 
 def handle_client(client):  # Takes client socket as argument.
     """Handles a single client connection."""
+
+    nome =''
+    mensagem=''
 
     name = client.recv(BUFSIZ).decode("utf8")
     welcome = 'Bem-vindo %s! Se você quiser sair, digite quit().' % name
@@ -36,13 +40,33 @@ def handle_client(client):  # Takes client socket as argument.
             clients[client] = msg[5:-1].decode("utf8")
             broadcast(bytes("%s alterou o nome para %s." %(name,msg[5:-1].decode("utf8")), "utf8"))
             name = msg[5:-1].decode("utf8")
+        elif msg[:8] == bytes("privado(","utf8") and chr(msg[len(msg) - 1]) == ")":
+            index = 99999           
+            for i in range(len(msg)):
+                if "," == chr(msg[i]):
+                    index = i
+                    break
+            nome = msg[8:index]
+            mensagem = bytes("PRIVADO[","utf8") + nome + bytes("]:","utf8") + msg[index + 1:-1]
+            for i in range(len(clients)):
+                if nome == bytes(list(clients.values())[i],"utf8"):
+                    print("achei")
+                    index = i
+                    break
+            if index != 99999:
+                print(index)
+                list(clients.keys())[index].send(mensagem)
+            else:
+                client.send(bytes("usuário não encontrado na sala. :/","utf8"))
+            
+                
+            ##list(clients.keys())[list(clients.values()).index(nome)].send(bytes(nome + " escreveu privado: " + mensagem,"utf8"))
+            ##list(clients.keys())[list(clients.values()).index(name)]
         elif msg == bytes("sair()","utf8"):
             client.close()
             del clients[client]
             broadcast(bytes("%s saiu da sala." % name, "utf8"))
-            print(bytes("%s saiu da sala." % name, "utf8"))
-            #client.send(bytes("sair()", "utf8"))
-            #client.close()     
+            print(bytes("%s saiu da sala." % name, "utf8")) 
             break
         else:
             broadcast(msg, name+" escreveu: ")
