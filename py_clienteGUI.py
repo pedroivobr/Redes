@@ -1,17 +1,29 @@
 #!/usr/bin/env python3
 """Script for Tkinter GUI chat client."""
-from socket import AF_INET, socket, SOCK_STREAM
+#from socket import AF_INET, socket, SOCK_STREAM
+import socket
 from threading import Thread
 import tkinter
 import time
+
+def decodificar(msg_recebida):
+    array = msg_recebida.slipt('/0')
+    return array
+def codificar(destino,nome,cmd,mensagem):
+    protocolo = "{}/0{}/0{}/0{}/0{}/0{}".format((16 + len(mensagem)),ip_client,destino,nome,cmd,mensagem)
+    return protocolo
+
+ip_client = socket.gethostbyname(socket.gethostname())
+ip_servidor = ""
 
 
 def receive():
     """Essa função mantem o cliente recebendo dados do servidor."""
     while True:
         try:
-            msg = client_socket.recv(BUFFERSIZE).decode("utf8")
-            msg_list.insert(tkinter.END, msg)
+            msg_servidor = client_socket.recv(BUFFERSIZE).decode("utf8")
+            msg = decodificar(msg_servidor)
+            msg_list.insert(tkinter.END, "%s escreveu: %s" %(msg[4],msg[-1]))
         except OSError:  # Possibly client has left the chat.
             break
 
@@ -21,10 +33,33 @@ def send(event=None):  # event is passed by binders.
     para enviar a msg ao servidor."""
     msg = my_msg.get()
     my_msg.set("")  #limpa o campo de entrada
-    client_socket.send(bytes(msg, "utf8"))
-    if msg == "sair()":
+
+    if msg[0:7] == "privado":
+        index = 99999           
+        for i in range(len(msg)):
+            if "," == chr(msg[i]):
+                index = i
+                break
+        cmd = "privado"
+        nick = msg[8:index]
+        mensagem = msg[index + 1:-1]
+    elif msg == "sair()":
+        nick = "SERVIDOR"
+        cmd = "sair"
+        mensagem = "sair"
         client_socket.close()
         janela.destroy()
+    elif msg == "listar()":
+        nick = "SERVIDOR"
+        cmd = "listar"
+        mensagem = "listar()"
+    else:
+        nick = "SERVIDOR"
+        cmd = "falar"
+        mensagem = msg
+    protocolo = codificar(ip_servidor,nick,cmd,mensagem)
+    client_socket.send(bytes(protocolo, "utf8"))
+    
 
 
 def on_closing(event=None):
@@ -70,10 +105,12 @@ if not PORT:
 else:
     PORT = int(PORT)
 
+ip_servidor = HOST
+
 BUFFERSIZE = 1024
 ADDR = (HOST, PORT)
 
-client_socket = socket(AF_INET, SOCK_STREAM)
+client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 client_socket.connect(ADDR)
 
 receive_thread = Thread(target=receive)
