@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-"""Server for multithreaded (asynchronous) chat application."""
 from socket import AF_INET, socket, SOCK_STREAM
 from threading import Thread
 
@@ -9,8 +8,8 @@ def accept_incoming_connections():
     """Sets up handling for incoming clients."""
     while True:
         client, client_address = SERVER.accept()
-        print("%s:%s has connected." % client_address)
-        client.send(bytes("Greetings from the cave! Now type your name and press enter!", "utf8"))
+        print("%s:%s foi conectado." % client_address)
+        client.send(bytes("Bem-vindo ao PyChat!!!!!! Agora coloque um nickname no campo e aperte ENTER!", "utf8"))
         addresses[client] = client_address
         Thread(target=handle_client, args=(client,)).start()
 
@@ -22,9 +21,9 @@ def handle_client(client):  # Takes client socket as argument.
     mensagem=''
 
     name = client.recv(BUFSIZ).decode("utf8")
-    welcome = 'Bem-vindo %s! Se você quiser sair, digite quit().' % name
+    welcome = 'Bem-vindo %s! Digite comandos() para mais informações.' % name
     client.send(bytes(welcome, "utf8"))
-    msg = "%s has joined the chat!" % name
+    msg = "%s enctrou no chat!" % name
     broadcast(bytes(msg, "utf8"))
     clients[client] = name
 
@@ -68,6 +67,12 @@ def handle_client(client):  # Takes client socket as argument.
             broadcast(bytes("%s saiu da sala." % name, "utf8"))
             print(bytes("%s saiu da sala." % name, "utf8")) 
             break
+        elif msg == bytes("comandos()","utf8"):
+            client.send(bytes("lista de comandos:","utf8"))
+            client.send(bytes("listar() - para listar usuários conectados.","utf8"))
+            client.send(bytes("privado(usuario,mensagem) - para enviar uma MENSAGEM privada para um USUARIO.\r\n","utf8"))
+            client.send(bytes("sair()- para sair para finalizar o cliente.\r\n","utf8"))
+            client.send(bytes("nome(nick_novo) - para alterar o nickname.\r\n","utf8"))
         else:
             broadcast(msg, name+" escreveu: ")
             
